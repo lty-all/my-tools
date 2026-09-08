@@ -1,0 +1,36 @@
+# Dependencies
+node_modules
+dist
+.pnpm-store
+
+# Build output
+build
+*.tsbuildinfo
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+.DS_Store
+
+# Logs
+logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# Prisma
+apps/api/prisma/migrations/dev.db
+apps/api/prisma/*.db
+
+# Docker
+docker/data
+
+# Test
+coverage

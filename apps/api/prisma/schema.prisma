@@ -1,0 +1,126 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============ 用户体系 ============
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String?
+  username  String?
+  avatar    String?
+  provider  String   @default("email") // github / google / email
+  providerId String?
+  role      UserRole @default(USER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  histories     ToolHistory[]
+  aiUsages      AIUsage[]
+  subscription  Subscription?
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+// ============ 工具体系 ============
+
+model ToolCategory {
+  id    Int    @id @default(autoincrement())
+  name  String
+  slug  String @unique
+  sort  Int    @default(0)
+  tools Tool[]
+}
+
+model Tool {
+  id          Int      @id @default(autoincrement())
+  name        String
+  slug        String   @unique
+  description String   @default("")
+  categoryId  Int?
+  icon        String?
+  isAI        Boolean  @default(false)
+  isPublished Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  category  ToolCategory? @relation(fields: [categoryId], references: [id])
+  histories ToolHistory[]
+}
+
+model ToolHistory {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  toolId    Int
+  input     String
+  output    String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tool Tool @relation(fields: [toolId], references: [id], onDelete: Cascade)
+}
+
+// ============ AI 模块 ============
+
+model AIUsage {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  model     String
+  tokens    Int
+  feature   String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ============ 会员体系（预留） ============
+
+model Subscription {
+  id                   Int       @id @default(autoincrement())
+  userId               Int       @unique
+  plan                 PlanType  @default(FREE)
+  stripeCustomerId     String?
+  stripeSubscriptionId String?
+  status               String    @default("active")
+  expireAt             DateTime?
+  createdAt            DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+enum PlanType {
+  FREE
+  PRO
+  TEAM
+}
+
+// ============ 开放 API（预留） ============
+
+model ApiKey {
+  id         Int       @id @default(autoincrement())
+  userId     Int
+  key        String    @unique
+  name       String
+  lastUsedAt DateTime?
+  createdAt  DateTime  @default(now())
+}
+
+// ============ SEO 博客（预留） ============
+
+model Article {
+  id          Int      @id @default(autoincrement())
+  title       String
+  slug        String   @unique
+  content     String
+  description String   @default("")
+  published   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+}
