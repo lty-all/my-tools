@@ -22,6 +22,15 @@ const gifSize = ref(0)
 let ffmpeg: FFmpeg | null = null
 let runCounter = 0
 
+// ffmpeg core 超过 Cloudflare Pages 25MiB 单文件限制，改为运行时从 CDN 加载
+const FFMPEG_CORE_BASE = 'https://unpkg.com/@ffmpeg/core@0.12.10/dist/umd'
+
+async function toBlobURL(url: string, type: string): Promise<string> {
+  const res = await fetch(url)
+  if (!res.ok) throw new Error(`Failed to fetch ${url} (${res.status})`)
+  return URL.createObjectURL(new Blob([await res.arrayBuffer()], { type }))
+}
+
 function formatSize(bytes: number) {
   if (bytes < 1024) return `${bytes} B`
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
@@ -59,8 +68,8 @@ async function getFfmpeg(): Promise<FFmpeg> {
       }
     })
     await instance.load({
-      coreURL: '/ffmpeg/ffmpeg-core.js',
-      wasmURL: '/ffmpeg/ffmpeg-core.wasm',
+      coreURL: await toBlobURL(`${FFMPEG_CORE_BASE}/ffmpeg-core.js`, 'text/javascript'),
+      wasmURL: await toBlobURL(`${FFMPEG_CORE_BASE}/ffmpeg-core.wasm`, 'application/wasm'),
     })
     ffmpeg = instance
     engineLoading.value = false

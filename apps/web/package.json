@@ -5,12 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "copy:ffmpeg": "node scripts/copy-ffmpeg.mjs",
-    "build": "node scripts/copy-ffmpeg.mjs && vue-tsc -b && vite build",
+    "build": "vue-tsc -b && vite build",
     "preview": "vite preview"
   },
   "dependencies": {
-    "@ffmpeg/core": "^0.12.10",
     "@ffmpeg/ffmpeg": "^0.12.15",
     "vue": "^3.5.39",
     "vue-router": "^4.4.0"
